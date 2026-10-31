@@ -4,18 +4,28 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - ".github/workflows/docker-build.yml"
       - "Dockerfile"
       - ".dockerignore"
       - ".nvmrc"
       - "docker-compose.yml"
       - "docker-entrypoint.sh"
       - "package*.json"
+      # tsconfig.json puts every root .ts in the type check, and next build
+      # runs ESLint.
+      - "*.ts"
+      - "*.mjs"
+      - "tsconfig.json"
+      - ".env.local"
       - "prisma/**"
       - "app/**"
       - "lib/**"
       - "public/**"
       - "hooks/**"
       - "scripts/**"
+      - "content/**"
+      - "hall-of-fame/**"
+      - "docs/src/data/roadmap.ts"
 
 permissions:
   contents: read
@@ -26,8 +36,13 @@ concurrency:
 
 jobs:
   build:
-    name: Docker Build Test
-    runs-on: ubuntu-latest
+    name: Docker Build Test (${{ matrix.runner }})
+    # Same hosts as the docker/github-builder defaults, which publish the image.
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-26.04, ubuntu-26.04-arm]
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -49,6 +64,11 @@ jobs:
             [ "$(docker inspect -f '{{.State.Running}}' smoke)" = true ] || exit 1
             sleep 2
           done
+
+      # better-sqlite3 loads its binary on the first Database, libxmljs2 on the
+      # first request to its route: the startup above loads neither.
+      - name: Load the native modules
+        run: docker exec smoke node -e "new (require('better-sqlite3'))(':memory:'); require('libxmljs2').parseXmlString('<a/>')"
 
       - name: Show container logs
         if: failure()
