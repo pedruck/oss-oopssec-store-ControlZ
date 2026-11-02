@@ -25,9 +25,25 @@ interface InvoiceData {
   address: InvoiceAddress;
   items: InvoiceItem[];
   total: number;
+  taxRate?: number;
+}
+
+function calculateTax(total: number, taxRate: number): number {
+  return total * taxRate;
+}
+
+function formatTaxRate(taxRate: number): string {
+  return `${taxRate * 100}%`;
 }
 
 export async function generateInvoice(data: InvoiceData): Promise<string> {
+  if (
+    data.taxRate !== undefined &&
+    (!Number.isFinite(data.taxRate) || data.taxRate < 0 || data.taxRate > 1)
+  ) {
+    throw new Error("taxRate must be between 0 and 1");
+  }
+
   const invoicesDir = join(process.cwd(), "documents", "invoices");
 
   if (!existsSync(invoicesDir)) {
@@ -168,9 +184,28 @@ export async function generateInvoice(data: InvoiceData): Promise<string> {
     color: rgb(0.7, 0.7, 0.7),
   });
 
+  const taxRate = data.taxRate ?? 0;
+  const tax = calculateTax(data.total, taxRate);
+  const invoiceTotal = data.total + tax;
+
   y -= 20;
+  if (data.taxRate !== undefined) {
+    page.drawText(`Tax (${formatTaxRate(taxRate)}):`, {
+      x: 400,
+      y,
+      size: 12,
+      font: helveticaBold,
+    });
+    page.drawText(`$${tax.toFixed(2)}`, {
+      x: 480,
+      y,
+      size: 12,
+      font: helveticaBold,
+    });
+    y -= 20;
+  }
   page.drawText("Total:", { x: 400, y, size: 12, font: helveticaBold });
-  page.drawText(`$${data.total.toFixed(2)}`, {
+  page.drawText(`$${invoiceTotal.toFixed(2)}`, {
     x: 480,
     y,
     size: 12,

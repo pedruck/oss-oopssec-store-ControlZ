@@ -78,4 +78,42 @@ describe("generateInvoice", () => {
     expect(writeFile).toHaveBeenCalledWith(expectedFilepath, pdfBytes);
     expect(result).toBe(expectedFilepath);
   });
+
+  it("includes tax in the invoice total when a tax rate is provided", async () => {
+    jest.mocked(existsSync).mockReturnValue(true);
+
+    await generateInvoice({ ...invoiceData, taxRate: 0.1 });
+
+    const drawText = mockPdfDocument.addPage.mock.results[0].value.drawText;
+    const renderedText = drawText.mock.calls.map(([text]: [string]) => text);
+
+    expect(renderedText).toContain("Tax (10%):");
+    expect(renderedText).toContain("$1.00");
+    expect(renderedText).toContain("$11.00");
+  });
+
+  it("shows a zero tax line when the tax rate is explicitly zero", async () => {
+    jest.mocked(existsSync).mockReturnValue(true);
+
+    await generateInvoice({ ...invoiceData, taxRate: 0 });
+
+    const drawText = mockPdfDocument.addPage.mock.results[0].value.drawText;
+    const renderedText = drawText.mock.calls.map(([text]: [string]) => text);
+
+    expect(renderedText).toContain("Tax (0%):");
+    expect(renderedText).toContain("$0.00");
+    expect(renderedText).toContain("$10.00");
+  });
+
+  it("rejects a negative tax rate", async () => {
+    await expect(
+      generateInvoice({ ...invoiceData, taxRate: -0.1 })
+    ).rejects.toThrow("taxRate must be between 0 and 1");
+  });
+
+  it("rejects a tax rate greater than one", async () => {
+    await expect(
+      generateInvoice({ ...invoiceData, taxRate: 1.1 })
+    ).rejects.toThrow("taxRate must be between 0 and 1");
+  });
 });
