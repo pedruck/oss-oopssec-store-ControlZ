@@ -97,7 +97,7 @@ export function getCweUrl(cwe: string): string | null {
 }
 
 export function getOwaspUrl(owasp: string): string | null {
-  const match = owasp.match(/^(A\d{2}):(2021|2025)$/);
+  const match = owasp.trim().match(/^(A\d{2}):(2021|2025)$/);
   if (!match) return null;
   const [, code, year] = match;
   if (year === "2025") {
