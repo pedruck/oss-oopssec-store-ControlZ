@@ -46,6 +46,10 @@ export function formatDateUTC(dateString: string): string {
   }
 }
 
+export function formatCurrency(value: number): string {
+  return `$${value.toFixed(2)}`;
+}
+
 export const CATEGORY_LABELS: Record<FlagCategory, string> = {
   INJECTION: "Injection",
   AUTHENTICATION: "Authentication",
