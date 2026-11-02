@@ -86,7 +86,8 @@ const OWASP_2025_SLUGS: Record<string, string> = {
   A10: "A10_2025-Mishandling_of_Exceptional_Conditions",
 };
 
-export function getCveUrl(cve: string): string {
+export function getCveUrl(cve: string): string | null {
+  if (!/^CVE-\d{4}-\d{4,}$/i.test(cve)) return null;
   return `https://nvd.nist.gov/vuln/detail/${encodeURIComponent(cve)}`;
 }
 

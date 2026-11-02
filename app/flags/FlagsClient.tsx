@@ -174,14 +174,20 @@ const BADGE_SIZE_COMPACT = "px-2 py-0.5 text-[10px]";
 const BADGE_SIZE_REGULAR = "px-2.5 py-1 text-xs";
 
 function CveBadge({ cve, compact }: { cve: string; compact: boolean }) {
+  const url = getCveUrl(cve);
+  const sizeClass = compact ? BADGE_SIZE_COMPACT : BADGE_SIZE_REGULAR;
+  const baseClass = `rounded-full bg-red-100 font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-400 ${sizeClass}`;
+  if (!url) {
+    return <span className={baseClass}>{cve}</span>;
+  }
   return (
     <a
-      href={getCveUrl(cve)}
+      href={url}
       target="_blank"
       rel="noopener noreferrer"
       onClick={(e) => e.stopPropagation()}
       aria-label={`View ${cve} details on NVD (opens in new tab)`}
-      className={`relative z-10 rounded-full bg-red-100 font-semibold text-red-700 transition-colors hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 ${compact ? BADGE_SIZE_COMPACT : BADGE_SIZE_REGULAR}`}
+      className={`relative z-10 transition-colors hover:bg-red-200 dark:hover:bg-red-900/50 ${baseClass}`}
     >
       {cve}
     </a>

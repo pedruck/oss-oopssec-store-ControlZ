@@ -412,17 +412,25 @@ export default function PlayerDashboardClient() {
                           <span className="text-slate-200">
                             {formatSlug(flag.slug)}
                           </span>
-                          {flag.cve && (
-                            <a
-                              href={getCveUrl(flag.cve)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              aria-label={`View ${flag.cve} details on NVD (opens in new tab)`}
-                              className="ml-2 rounded bg-rose-950 px-1.5 py-0.5 text-xs text-rose-400 transition-colors hover:bg-rose-900"
-                            >
-                              {flag.cve}
-                            </a>
-                          )}
+                          {flag.cve &&
+                            (() => {
+                              const cveUrl = getCveUrl(flag.cve);
+                              const baseClass =
+                                "ml-2 rounded bg-rose-950 px-1.5 py-0.5 text-xs text-rose-400";
+                              return cveUrl ? (
+                                <a
+                                  href={cveUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={`View ${flag.cve} details on NVD (opens in new tab)`}
+                                  className={`${baseClass} transition-colors hover:bg-rose-900`}
+                                >
+                                  {flag.cve}
+                                </a>
+                              ) : (
+                                <span className={baseClass}>{flag.cve}</span>
+                              );
+                            })()}
                           {flag.cwe &&
                             (() => {
                               const cweUrl = getCweUrl(flag.cwe);

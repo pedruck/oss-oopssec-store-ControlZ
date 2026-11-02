@@ -99,17 +99,25 @@ export default async function VulnerabilityPage({
                 <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
                   {formatSlug(flag.slug)}
                 </h1>
-                {flag.cve && (
-                  <a
-                    href={getCveUrl(flag.cve)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`View ${flag.cve} details on NVD (opens in new tab)`}
-                    className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800 transition-colors hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
-                  >
-                    {flag.cve}
-                  </a>
-                )}
+                {flag.cve &&
+                  (() => {
+                    const cveUrl = getCveUrl(flag.cve);
+                    const className =
+                      "rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800 dark:bg-red-900/30 dark:text-red-400";
+                    return cveUrl ? (
+                      <a
+                        href={cveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`View ${flag.cve} details on NVD (opens in new tab)`}
+                        className={`${className} transition-colors hover:bg-red-200 dark:hover:bg-red-900/50`}
+                      >
+                        {flag.cve}
+                      </a>
+                    ) : (
+                      <span className={className}>{flag.cve}</span>
+                    );
+                  })()}
                 {flag.cwe &&
                   (() => {
                     const cweUrl = getCweUrl(flag.cwe);
