@@ -27,6 +27,23 @@ interface InvoiceData {
   total: number;
 }
 
+function formatInvoiceDate(date: Date): string {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+function formatCurrency(amount: number): string {
+  return `$${(Math.round((amount + Number.EPSILON) * 100) / 100).toFixed(2)}`;
+}
+
+function formatItemName(name: string): string {
+  return name.length > 40 ? `${name.substring(0, 40)}...` : name;
+}
+
 export async function generateInvoice(data: InvoiceData): Promise<string> {
   const invoicesDir = join(process.cwd(), "documents", "invoices");
 
@@ -75,19 +92,12 @@ export async function generateInvoice(data: InvoiceData): Promise<string> {
   });
 
   y -= 15;
-  page.drawText(
-    `Date: ${createdAtDate.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })}`,
-    {
-      x: 50,
-      y,
-      size: 10,
-      font: helvetica,
-    }
-  );
+  page.drawText(`Date: ${formatInvoiceDate(createdAtDate)}`, {
+    x: 50,
+    y,
+    size: 10,
+    font: helvetica,
+  });
 
   y -= 30;
   page.drawText("Bill To:", {
@@ -136,8 +146,7 @@ export async function generateInvoice(data: InvoiceData): Promise<string> {
   y -= 15;
   for (const item of data.items) {
     const lineTotal = item.quantity * item.priceAtPurchase;
-    const itemName =
-      item.name.length > 40 ? item.name.substring(0, 40) + "..." : item.name;
+    const itemName = formatItemName(item.name);
 
     page.drawText(itemName, { x: 50, y, size: 10, font: helvetica });
     page.drawText(item.quantity.toString(), {
@@ -146,13 +155,13 @@ export async function generateInvoice(data: InvoiceData): Promise<string> {
       size: 10,
       font: helvetica,
     });
-    page.drawText(`$${item.priceAtPurchase.toFixed(2)}`, {
+    page.drawText(formatCurrency(item.priceAtPurchase), {
       x: 400,
       y,
       size: 10,
       font: helvetica,
     });
-    page.drawText(`$${lineTotal.toFixed(2)}`, {
+    page.drawText(formatCurrency(lineTotal), {
       x: 480,
       y,
       size: 10,
@@ -170,7 +179,7 @@ export async function generateInvoice(data: InvoiceData): Promise<string> {
 
   y -= 20;
   page.drawText("Total:", { x: 400, y, size: 12, font: helveticaBold });
-  page.drawText(`$${data.total.toFixed(2)}`, {
+  page.drawText(formatCurrency(data.total), {
     x: 480,
     y,
     size: 12,

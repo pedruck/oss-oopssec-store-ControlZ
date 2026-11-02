@@ -78,4 +78,85 @@ describe("generateInvoice", () => {
     expect(writeFile).toHaveBeenCalledWith(expectedFilepath, pdfBytes);
     expect(result).toBe(expectedFilepath);
   });
+
+  it("renders invoice dates in UTC", async () => {
+    jest.mocked(existsSync).mockReturnValue(true);
+    const date = new Date("2026-11-01T23:30:00.000Z");
+
+    await generateInvoice({ ...invoiceData, createdAt: date });
+
+    const page = mockPdfDocument.addPage.mock.results[0].value;
+    expect(page.drawText).toHaveBeenCalledWith(
+      "Date: November 1, 2026",
+      expect.objectContaining({ x: 50, size: 10 })
+    );
+  });
+
+  it.each([
+    ["short", "Product name", "Product name"],
+    [
+      "40 characters",
+      "1234567890123456789012345678901234567890",
+      "1234567890123456789012345678901234567890",
+    ],
+    [
+      "41 characters",
+      "12345678901234567890123456789012345678901",
+      "1234567890123456789012345678901234567890...",
+    ],
+  ])(
+    "formats an item name with %s correctly",
+    async (_label, name, expectedName) => {
+      jest.mocked(existsSync).mockReturnValue(true);
+
+      await generateInvoice({
+        ...invoiceData,
+        items: [{ name, quantity: 1, priceAtPurchase: 10 }],
+      });
+
+      const page = mockPdfDocument.addPage.mock.results[0].value;
+      expect(page.drawText).toHaveBeenCalledWith(
+        expectedName,
+        expect.objectContaining({ x: 50, size: 10 })
+      );
+    }
+  );
+
+  it("does not render item rows when the invoice has no items", async () => {
+    jest.mocked(existsSync).mockReturnValue(true);
+
+    await generateInvoice({ ...invoiceData, items: [] });
+
+    const page = mockPdfDocument.addPage.mock.results[0].value;
+    const itemHeaderWasRendered = page.drawText.mock.calls.some(
+      (call: unknown[]) => call[0] === "Item"
+    );
+    const itemRowCalls = page.drawText.mock.calls.filter(
+      (call: unknown[]) =>
+        call[0] === "1" || call[0] === "$10.00" || call[0] === "Test Product"
+    );
+
+    expect(itemHeaderWasRendered).toBe(true);
+    expect(itemRowCalls).toHaveLength(0);
+  });
+
+  it("renders a three-item total with exactly two decimal places", async () => {
+    jest.mocked(existsSync).mockReturnValue(true);
+
+    await generateInvoice({
+      ...invoiceData,
+      items: [{ name: "Product", quantity: 3, priceAtPurchase: 19.99 }],
+      total: 59.97,
+    });
+
+    const page = mockPdfDocument.addPage.mock.results[0].value;
+    expect(page.drawText).toHaveBeenCalledWith(
+      "$59.97",
+      expect.objectContaining({ x: 480, size: 12 })
+    );
+    expect(page.drawText).toHaveBeenCalledWith(
+      "$59.97",
+      expect.objectContaining({ x: 480, size: 10 })
+    );
+  });
 });
