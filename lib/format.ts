@@ -93,7 +93,8 @@ export function getCveUrl(cve: string): string {
 export function getCweUrl(cwe: string): string | null {
   const match = cwe.match(/^CWE-(\d+)$/i);
   if (!match) return null;
-  return `https://cwe.mitre.org/data/definitions/${match[1].replace(/^0+(?=\d)/, "")}.html`;
+  const id = match[1].replace(/^0+(?=\d)/, "");
+  return `https://cwe.mitre.org/data/definitions/${id}.html`;
 }
 
 export function getOwaspUrl(owasp: string): string | null {
