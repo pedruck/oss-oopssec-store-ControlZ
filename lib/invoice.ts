@@ -2,6 +2,7 @@ import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
+import { formatCurrency } from "@/lib/format";
 
 interface InvoiceAddress {
   street: string;
@@ -146,13 +147,13 @@ export async function generateInvoice(data: InvoiceData): Promise<string> {
       size: 10,
       font: helvetica,
     });
-    page.drawText(`$${item.priceAtPurchase.toFixed(2)}`, {
+    page.drawText(formatCurrency(item.priceAtPurchase), {
       x: 400,
       y,
       size: 10,
       font: helvetica,
     });
-    page.drawText(`$${lineTotal.toFixed(2)}`, {
+    page.drawText(formatCurrency(lineTotal), {
       x: 480,
       y,
       size: 10,
@@ -170,7 +171,7 @@ export async function generateInvoice(data: InvoiceData): Promise<string> {
 
   y -= 20;
   page.drawText("Total:", { x: 400, y, size: 12, font: helveticaBold });
-  page.drawText(`$${data.total.toFixed(2)}`, {
+  page.drawText(formatCurrency(data.total), {
     x: 480,
     y,
     size: 12,

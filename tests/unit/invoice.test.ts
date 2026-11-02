@@ -73,6 +73,23 @@ describe("generateInvoice - file generation", () => {
         expect.any(Object)
       );
     });
+
+    it("escreve o preço unitário, o total do item e o total do pedido", async () => {
+      mockedExistsSync.mockReturnValue(true);
+
+      await generateInvoice({
+        ...order,
+        items: [{ name: "Mouse", quantity: 2, priceAtPurchase: 10.5 }],
+        total: 25,
+      });
+
+      const writtenTexts = drawTextSpy.mock.calls.map(
+        (call: unknown[]) => call[0]
+      );
+      expect(writtenTexts).toEqual(
+        expect.arrayContaining(["$10.50", "$21.00", "$25.00"])
+      );
+    });
   });
 
   describe("white box: branch coverage of existsSync(invoicesDir)", () => {
