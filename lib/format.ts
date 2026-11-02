@@ -94,6 +94,7 @@ export function getCweUrl(cwe: string): string | null {
   const match = cwe.match(/^CWE-(\d+)$/i);
   if (!match) return null;
   const id = match[1].replace(/^0+(?=\d)/, "");
+  if (id === "0") return null;
   return `https://cwe.mitre.org/data/definitions/${id}.html`;
 }
 
