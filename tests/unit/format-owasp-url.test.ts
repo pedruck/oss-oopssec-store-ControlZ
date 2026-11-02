@@ -59,3 +59,11 @@ describe("getOwaspUrl", () => {
     });
   });
 });
+
+describe("getOwaspUrl TDD: surrounding whitespace", () => {
+  it("ignores surrounding whitespace", () => {
+    const expected = "https://owasp.org/Top10/A01_2021-Broken_Access_Control/";
+    expect(getOwaspUrl(" A01:2021 ")).toBe(expected);
+    expect(getOwaspUrl("A01:2021\n")).toBe(expected);
+  });
+});
