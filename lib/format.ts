@@ -91,11 +91,9 @@ export function getCveUrl(cve: string): string {
 }
 
 export function getCweUrl(cwe: string): string | null {
-  const match = cwe.match(/^CWE-(\d+)$/i);
+  const match = cwe.match(/^CWE-0*([1-9]\d*)$/i);
   if (!match) return null;
-  const id = match[1].replace(/^0+(?=\d)/, "");
-  if (id === "0") return null;
-  return `https://cwe.mitre.org/data/definitions/${id}.html`;
+  return `https://cwe.mitre.org/data/definitions/${match[1]}.html`;
 }
 
 export function getOwaspUrl(owasp: string): string | null {
