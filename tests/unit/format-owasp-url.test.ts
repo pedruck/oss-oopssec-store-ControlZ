@@ -67,3 +67,11 @@ describe("getOwaspUrl TDD: surrounding whitespace", () => {
     expect(getOwaspUrl("A01:2021\n")).toBe(expected);
   });
 });
+
+describe("getOwaspUrl TDD: non-string input", () => {
+  it("returns null for a non-string input", () => {
+    expect(getOwaspUrl(null as unknown as string)).toBeNull();
+    expect(getOwaspUrl(undefined as unknown as string)).toBeNull();
+    expect(getOwaspUrl(123 as unknown as string)).toBeNull();
+  });
+});
