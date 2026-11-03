@@ -96,12 +96,13 @@ describe("create-oss-store Node version guard", () => {
     // `files` does not list package.json, but npm always includes it. If that
     // ever changed, the guard would throw ENOENT on every install instead.
     const result = spawnSync(
-      "npm",
+      process.platform === "win32" ? "npm.cmd" : "npm",
       ["pack", "--dry-run", "--json", "--ignore-scripts"],
       {
         cwd: path.resolve(__dirname, "../../packages/create-oss-store"),
         encoding: "utf8",
         timeout: 60000,
+        shell: process.platform === "win32",
       }
     );
 
