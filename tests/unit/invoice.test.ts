@@ -90,6 +90,20 @@ describe("generateInvoice - file generation", () => {
         expect.arrayContaining(["$10.50", "$21.00", "$25.00"])
       );
     });
+
+    it("escreve o total de unidades do pedido", async () => {
+      mockedExistsSync.mockReturnValue(true);
+
+      await generateInvoice({
+        ...order,
+        items: [
+          { name: "Mouse", quantity: 2, priceAtPurchase: 10.5 },
+          { name: "Laptop", quantity: 1, priceAtPurchase: 999.99 },
+        ],
+      });
+
+      expect(drawTextSpy).toHaveBeenCalledWith("Items: 3", expect.any(Object));
+    });
   });
 
   describe("white box: branch coverage of existsSync(invoicesDir)", () => {
