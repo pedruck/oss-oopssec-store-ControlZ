@@ -99,6 +99,7 @@ export function getCweUrl(cwe: string): string | null {
 const OWASP_ID_PATTERN = /^(A\d{2}):(2021|2025)$/;
 
 export function getOwaspUrl(owasp: string): string | null {
+  if (typeof owasp !== "string") return null;
   const match = owasp.trim().match(OWASP_ID_PATTERN);
   if (!match) return null;
   const [, code, year] = match;
