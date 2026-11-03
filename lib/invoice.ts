@@ -28,6 +28,10 @@ interface InvoiceData {
   total: number;
 }
 
+export function countInvoiceItems(items: InvoiceItem[]): number {
+  return items.reduce((count, item) => count + item.quantity, 0);
+}
+
 export async function generateInvoice(data: InvoiceData): Promise<string> {
   const invoicesDir = join(process.cwd(), "documents", "invoices");
 
@@ -170,6 +174,12 @@ export async function generateInvoice(data: InvoiceData): Promise<string> {
   });
 
   y -= 20;
+  page.drawText(`Items: ${countInvoiceItems(data.items)}`, {
+    x: 50,
+    y,
+    size: 12,
+    font: helvetica,
+  });
   page.drawText("Total:", { x: 400, y, size: 12, font: helveticaBold });
   page.drawText(formatCurrency(data.total), {
     x: 480,
