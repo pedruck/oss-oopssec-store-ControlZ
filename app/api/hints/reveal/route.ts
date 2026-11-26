@@ -59,6 +59,7 @@ export async function POST() {
       remainingUnrevealed.length > 0 ? remainingUnrevealed[0].level : null;
 
     return NextResponse.json({
+      slug: activeFlag.slug,
       hint: { level: nextHint.level, content: nextHint.content },
       nextHintLevel,
     });

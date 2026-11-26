@@ -37,6 +37,12 @@ export default function HintPanel({ initialState }: HintPanelProps) {
       const response = await fetch("/api/hints/reveal", { method: "POST" });
       if (response.ok) {
         const data = await response.json();
+        // The active challenge can change while the panel is open (solved in
+        // another tab): reload it instead of listing the hint under the old one.
+        if (data.slug !== hintState.activeFlag?.slug) {
+          await refreshHintState();
+          return;
+        }
         setHintState((prev) => ({
           ...prev,
           revealedHints: [...prev.revealedHints, data.hint as RevealedHint],
