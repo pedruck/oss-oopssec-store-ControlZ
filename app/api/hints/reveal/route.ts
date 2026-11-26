@@ -4,6 +4,12 @@ import { logger } from "@/lib/logger";
 
 const DIFFICULTY_ORDER = { EASY: 0, MEDIUM: 1, HARD: 2 } as const;
 
+const isUniqueViolation = (error: unknown) =>
+  typeof error === "object" &&
+  error !== null &&
+  "code" in error &&
+  error.code === "P2002";
+
 export async function POST() {
   try {
     const [allFlags, foundFlagIds] = await Promise.all([
@@ -48,9 +54,19 @@ export async function POST() {
       );
     }
 
-    await prisma.revealedHint.create({
-      data: { hintId: nextHint.id },
-    });
+    try {
+      await prisma.revealedHint.create({
+        data: { hintId: nextHint.id },
+      });
+    } catch (error) {
+      // A concurrent request picked the same next hint; the unique index on
+      // hintId lets only one reveal through.
+      if (!isUniqueViolation(error)) throw error;
+      return NextResponse.json(
+        { error: "This hint has already been revealed. Refresh to see it." },
+        { status: 409 }
+      );
+    }
 
     const remainingUnrevealed = hints.filter(
       (h) => !h.revealedHint && h.id !== nextHint.id
