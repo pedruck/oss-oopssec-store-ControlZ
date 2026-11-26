@@ -247,6 +247,15 @@ npm run db:upgrade             # local clone
 docker compose up -d --build   # Docker: the entrypoint upgrades on start
 ```
 
+On a local clone, run the steps in this order, after pulling the new version:
+
+```bash
+npm install
+npm run db:upgrade
+npm run build
+npm start
+```
+
 Your orders, captured flags, users and uploads are left untouched. The app refuses to start against a database that is a schema behind, and names the command to run. To wipe everything instead and start fresh, use `npm run docker:reset` (Docker) or `npm run setup` (npm).
 
 ## Hall of fame
