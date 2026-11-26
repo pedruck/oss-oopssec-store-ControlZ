@@ -3,6 +3,11 @@ import Footer from "../components/Footer";
 import PlayerDashboardClient from "./PlayerDashboardClient";
 import { version } from "../../package.json";
 
+// The header shows the current time next to a "live" indicator. Nothing else
+// here reads request data, so without this the page would be prerendered at
+// build time and the timestamp would stay frozen on the build.
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Player Dashboard – OopsSec Store",
   description: "Track your progress in finding security vulnerabilities",
